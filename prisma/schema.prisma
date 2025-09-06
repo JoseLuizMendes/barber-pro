@@ -163,6 +163,8 @@ model Booking {
 
   scheduledAt DateTime // data + horário juntos
 
+  price       Decimal   @db.Decimal(10,2)
+
   status BookingStatus @default(SCHEDULED)
   notes  String?
 
@@ -185,3 +187,4 @@ enum BookingStatus {
   CANCELLED
   NO_SHOW
 }
+

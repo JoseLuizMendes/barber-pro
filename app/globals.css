@@ -96,3 +96,42 @@
     @apply h-full bg-background text-foreground;
   }
 }
+
+@layer components {
+  .container .curved-shape {
+    transform: rotate(8deg) skewY(40deg);
+  }
+  .container.active .curved-shape {
+    transform: rotate(0deg) skewY(0deg);
+  }
+
+  .container .curved-shape2 {
+    transform: rotate(0deg) skewY(0deg);
+  }
+  .container.active .curved-shape2 {
+    transform: rotate(-11deg) skewY(-39deg);
+  }
+
+  .form-box.Register,
+  .info-content.Register {
+    opacity: 0;
+    transform: translateX(190%);
+    transition: 2.0s ease;
+  }
+  .container.active .form-box.Register,
+  .container.active .info-content.Register {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .form-box.Login,
+  .info-content.Login {
+    transition: 2.0s ease;
+  }
+  .container.active .form-box.Login,
+  .container.active .info-content.Login {
+    opacity: 0;
+    transform: translateX(-190%);
+  }
+  
+}

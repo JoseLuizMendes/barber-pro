@@ -106,7 +106,8 @@ async function seedDatabase() {
       data: {
         id: "test-user-id-123", // ID fixo para teste
         name: "João Silva",
-        email: "joao.barbeiro@example.com",
+        email: "joao.barberpro@gmail.com",
+        //senha: admbarberpro
         password: "123456",
       },
     })
@@ -139,7 +140,8 @@ async function seedDatabase() {
       data: {
         id: "employee-user-id-001",
         name: "Carlos Pereira",
-        email: "carlos.funcionario@example.com",
+        email: "carlos.empbarberpro@gmail.com",
+        //empbarberpro
         password: "123456",
       },
     })
@@ -148,7 +150,8 @@ async function seedDatabase() {
       data: {
         id: "employee-user-id-002",
         name: "Ricardo Santos",
-        email: "ricardo.funcionario@example.com",
+        email: "ricardo.empbarberpro@gmail.com",
+        //empbarberpro
         password: "123456",
       },
     })

@@ -103,6 +103,7 @@ export const createBooking = async (params: CreateBookingParams) => {
           employeeId: params.employeeId,
           scheduledAt: params.date,
           status: "SCHEDULED", // ✅ Status explícito
+          price: service.price,
         },
         include: {
           service: {
