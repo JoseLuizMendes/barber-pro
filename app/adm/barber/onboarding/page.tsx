@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "@/app/_lib/auth"
 import { db } from "@/app/_lib/prisma"
-import OnboardingForm from "./onboarding-form"
+import OnboardingForm from "./form/onboarding-form"
 
 export default async function OnboardingPage() {
   // Verificar autenticação

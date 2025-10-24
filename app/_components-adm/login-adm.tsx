@@ -67,7 +67,7 @@ export default function AuthTabs() {
       const result = await signIn("credentials", {
         email: registerEmail,
         password: registerPassword,
-        redirect: false,
+        callbackUrl: "/adm/barber/onboarding",
       })
 
       if (result?.error) {
