@@ -17,11 +17,9 @@ export async function POST(req: Request) {
     const validation = registerSchema.safeParse(body)
 
     if (!validation.success) {
-      const errorMessage = validation.error.errors[0]?.message || "Dados inválidos"
-      return NextResponse.json(
-        { error: errorMessage },
-        { status: 400 },
-      )
+      const errorMessage =
+        validation.error.issues[0]?.message || "Dados inválidos"
+      return NextResponse.json({ error: errorMessage }, { status: 400 })
     }
 
     const { email, password, name } = validation.data
