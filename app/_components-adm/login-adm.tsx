@@ -21,7 +21,7 @@ export default function AuthTabs() {
   const handleRegister = async () => {
     try {
       setLoading(true)
-      const res = await fetch("app/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
