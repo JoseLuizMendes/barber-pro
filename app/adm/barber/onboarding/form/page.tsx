@@ -1,8 +1,8 @@
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
+import OnboardingForm from "@/app/_components-adm/onboarding-form"
 import { authOptions } from "@/app/_lib/auth"
 import { db } from "@/app/_lib/prisma"
-import OnboardingForm from "../../../_components-adm/onboarding-form"
+import { getServerSession } from "next-auth"
+import { redirect } from "next/navigation"
 
 export default async function OnboardingPage() {
   // Verificar autenticação
