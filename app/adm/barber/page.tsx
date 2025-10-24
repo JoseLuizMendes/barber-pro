@@ -1,6 +1,10 @@
-//import Header from "@/app/_components/header"
 import HeaderAdm from "@/app/_components-adm/header-adm"
-import { Card, CardContent } from "@/app/_components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/app/_components/ui/card"
 import { db } from "@/app/_lib/prisma"
 import { endOfDay, endOfMonth, startOfDay, startOfMonth } from "date-fns"
 import {
@@ -13,6 +17,9 @@ import {
   WalletIcon,
 } from "lucide-react"
 import Link from "next/link"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/app/_lib/auth"
+import { redirect } from "next/navigation"
 
 interface BarberPageAdmProps {
   params: {
@@ -26,6 +33,24 @@ interface BarberPageAdmProps {
 }
 
 const BarberPage = async ({}: BarberPageAdmProps) => {
+  // Verificar autenticação
+  const session = await getServerSession(authOptions)
+
+  if (!session || !session.user) {
+    redirect("/adm/login")
+  }
+
+  // Buscar dados do barbeiro e barbearia
+  const barber = await db.barber.findUnique({
+    where: { userId: session.user.id },
+    include: {
+      barbershop: true,
+    },
+  })
+
+  if (!barber) {
+    redirect("/adm/barber/onboarding")
+  }
   const today = new Date()
 
   const bookings = await db.booking.findMany({
@@ -64,7 +89,53 @@ const BarberPage = async ({}: BarberPageAdmProps) => {
       <HeaderAdm />
 
       <div className="flex-row border-b border-solid p-5">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <div className="mb-4">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Bem-vindo, {session.user.name}! Gerenciando {barber.barbershop.name}
+          </p>
+        </div>
+
+        {/* Informações da Barbearia */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Informações da Barbearia</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <strong className="text-sm">Nome:</strong>
+                <p className="text-muted-foreground">
+                  {barber.barbershop.name}
+                </p>
+              </div>
+              <div>
+                <strong className="text-sm">Endereço:</strong>
+                <p className="text-muted-foreground">
+                  {barber.barbershop.address}
+                </p>
+              </div>
+              <div>
+                <strong className="text-sm">Telefones:</strong>
+                <p className="text-muted-foreground">
+                  {barber.barbershop.phones.join(", ")}
+                </p>
+              </div>
+              <div>
+                <strong className="text-sm">Especialidades:</strong>
+                <p className="text-muted-foreground">
+                  {barber.specialties.join(", ")}
+                </p>
+              </div>
+            </div>
+            <div>
+              <strong className="text-sm">Descrição:</strong>
+              <p className="text-muted-foreground">
+                {barber.barbershop.description}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Linha de cards principais */}
         <div className="flex gap-4 p-5 py-5 text-center sm:flex-row">

@@ -35,9 +35,20 @@ export const step3Schema = z.object({
     .max(500, "Descrição não pode exceder 500 caracteres"),
   openingHours: z
     .record(
+      z.string(),
       z.object({
-        open: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato de hora inválido (HH:MM)"),
-        close: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Formato de hora inválido (HH:MM)"),
+        open: z
+          .string()
+          .regex(
+            /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+            "Formato de hora inválido (HH:MM)",
+          ),
+        close: z
+          .string()
+          .regex(
+            /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+            "Formato de hora inválido (HH:MM)",
+          ),
       }),
     )
     .optional(),
@@ -58,10 +69,15 @@ export const completeOnboardingSchema = z.object({
   phones: z.array(z.string()).min(1),
   description: z.string().min(10).max(500),
   imageUrl: z.string().url(),
-  openingHours: z.record(z.object({
-    open: z.string(),
-    close: z.string(),
-  })).optional(),
+  openingHours: z
+    .record(
+      z.string(),
+      z.object({
+        open: z.string(),
+        close: z.string(),
+      }),
+    )
+    .optional(),
 })
 
 // Types exportados

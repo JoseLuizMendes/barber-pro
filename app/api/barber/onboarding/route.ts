@@ -2,7 +2,7 @@ import { db } from "@/app/_lib/prisma"
 import { completeOnboardingSchema } from "@/lib/validations/barber-onboarding"
 import { getServerSession } from "next-auth"
 import { NextResponse } from "next/server"
-import { authOptions } from "../../auth/[...nextauth]/route"
+import { authOptions } from "@/app/_lib/auth"
 
 export async function POST(req: Request) {
   try {
@@ -10,10 +10,7 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
 
     if (!session || !session.user) {
-      return NextResponse.json(
-        { error: "Não autenticado" },
-        { status: 401 },
-      )
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 })
     }
 
     const userId = session.user.id
@@ -26,7 +23,9 @@ export async function POST(req: Request) {
 
     if (!user || user.role !== "BARBER") {
       return NextResponse.json(
-        { error: "Apenas usuários com role BARBER podem completar o onboarding" },
+        {
+          error: "Apenas usuários com role BARBER podem completar o onboarding",
+        },
         { status: 403 },
       )
     }
@@ -57,7 +56,7 @@ export async function POST(req: Request) {
           phones: validatedData.phones,
           description: validatedData.description,
           imageUrl: validatedData.imageUrl,
-          openingHours: validatedData.openingHours || {},
+          openingHours: (validatedData.openingHours as object) || {},
           isActive: true,
         },
       })
