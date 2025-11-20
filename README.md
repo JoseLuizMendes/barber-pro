@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+### Barber Pro - Sistema de Gerenciamento de Barbearia
+**Repositório:** [JoseLuizMendes/barber-pro](https://github.com/JoseLuizMendes/barber-pro)
 
-## Getting Started
+Sistema profissional para gerenciamento de barbearias, incluindo agendamentos, controle de clientes e serviços.
 
-First, run the development server:
+#### 🛠️ Tecnologias
+- **Linguagem Principal:** TypeScript (98.4%)
+- **Estilização:** CSS (1.4%)
+- **Runtime:** JavaScript (0.2%)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+#### ✨ Características
+- Sistema de agendamento
+- Gerenciamento de clientes
+- Controle de serviços
+- Interface moderna e responsiva
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Competências Demonstradas
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Frontend
+- React.js & Next.js
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Three.js / React Three Fiber
+- Vite
+- Responsive Design
+- UI/UX Design
 
-## Learn More
+### Backend
+- Express.js
+- Prisma ORM
+- Node-Cron
+- API RESTful
+- Authentication Systems
 
-To learn more about Next.js, take a look at the following resources:
+### Tools & Libraries
+- Radix UI
+- React Hook Form
+- Zod Validation
+- TanStack Query
+- Mapbox GL
+- Recharts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### DevOps & Deploy
+- Vercel
+- Git & GitHub
+- Environment Variables
+- Performance Optimization
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📊 Estatísticas dos Repositórios
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Projeto | Linguagem Principal | Status | Deploy |
+|---------|-------------------|--------|--------|
+| PortDev | TypeScript (95.3%) | ✅ Ativo | [Vercel](https://portdev-bice.vercel.app) |
+| Wedding | TypeScript (97.1%) | 🔒 Privado | - |
+| Barber Pro | TypeScript (98.4%) | ✅ Ativo | - |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
