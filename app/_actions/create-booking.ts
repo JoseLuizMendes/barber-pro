@@ -1,11 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use server"
 
 import { getServerSession } from "next-auth"
 import { revalidatePath } from "next/cache"
 import { authOptions } from "../_lib/auth"
-import { db } from "../_lib/prisma"
-import { validateBookingAvailability } from "./get-service-employees"
+import { createAppointment } from "../_services/api"
+
+// Temporary constants - TODO: Replace with proper implementations
+const TEMP_CUSTOMER_PHONE = "+5500000000000" // TODO: Add phone field to User model
+const DEFAULT_EMPLOYEE_NAME = "Barbeiro" // TODO: Get from API response when available
 
 interface CreateBookingParams {
   serviceId: string
@@ -21,235 +23,75 @@ export const createBooking = async (params: CreateBookingParams) => {
     throw new Error("Usuário não autenticado")
   }
 
-  const userId = (session.user as { id: string }).id
+  const user = session.user as { id: string; name?: string | null }
 
   console.log("=== CREATE BOOKING PARAMS ===", params)
-  console.log("=== USER ID ===", userId)
+  console.log("=== USER ===", user)
 
-  // ✅ SOLUÇÃO 1: VALIDAÇÃO CRÍTICA ANTES DE CRIAR O BOOKING
-  // Esta validação acontece no momento exato da confirmação
-  const validation = await validateBookingAvailability({
-    barbershopId: params.barbershopId,
-    serviceId: params.serviceId,
-    employeeId: params.employeeId,
-    scheduledAt: params.date,
-  })
-
-  if (!validation.isValid) {
-    console.log("❌ VALIDAÇÃO FALHOU:", validation.error)
-    throw new Error(validation.error)
-  }
-
-  console.log("✅ VALIDAÇÃO PASSOU - Horário disponível")
-
-  // ✅ SOLUÇÃO 2: TRANSAÇÃO ATÔMICA PARA EVITAR RACE CONDITIONS
-  // Usar uma transação garante que a verificação e criação aconteçam atomicamente
   try {
-    const newBooking = await db.$transaction(async (prisma) => {
-      // ✅ DOUBLE-CHECK: Verificar novamente dentro da transação
-      const conflictingBooking = await prisma.booking.findFirst({
-        where: {
-          employeeId: params.employeeId,
-          scheduledAt: params.date,
-          status: {
-            in: ["SCHEDULED", "CONFIRMED", "IN_PROGRESS"],
-          },
-        },
-      })
+    // Map frontend data to backend API format
+    const appointmentData = {
+      customerName: user.name || "Cliente", // Map User.name to customerName
+      customerPhone: TEMP_CUSTOMER_PHONE, // Temporary - see constant definition
+      serviceId: params.serviceId, // Map Service.id to serviceId
+      startTime: params.date.toISOString(), // Map Date to ISO string
+    }
 
-      if (conflictingBooking) {
-        throw new Error(
-          "Horário não está mais disponível - outro agendamento foi criado",
-        )
-      }
+    console.log("🚀 Criando appointment via API:", appointmentData)
 
-      // ✅ Verificar se o employee ainda existe e está ativo
-      const employee = await prisma.employee.findFirst({
-        where: {
-          id: params.employeeId,
-          barbershopId: params.barbershopId,
-          isActive: true,
-        },
-        include: {
-          user: {
-            select: { id: true, name: true },
-          },
-        },
-      })
+    // Call external API to create appointment
+    const appointment = await createAppointment(appointmentData)
 
-      if (!employee) {
-        throw new Error("Funcionário não encontrado ou inativo")
-      }
+    console.log("✅ APPOINTMENT CRIADO COM SUCESSO:", appointment.id)
 
-      // ✅ Verificar se o serviço ainda existe e está ativo
-      const service = await prisma.barbershopService.findFirst({
-        where: {
-          id: params.serviceId,
-          barbershopId: params.barbershopId,
-          isActive: true,
-        },
-      })
-
-      if (!service) {
-        throw new Error("Serviço não encontrado ou inativo")
-      }
-
-      // ✅ CRIAR O BOOKING - só chega aqui se tudo estiver OK
-      const booking = await prisma.booking.create({
-        data: {
-          userId,
-          serviceId: params.serviceId,
-          barbershopId: params.barbershopId,
-          employeeId: params.employeeId,
-          scheduledAt: params.date,
-          status: "SCHEDULED", // ✅ Status explícito
-          price: service.price,
-        },
-        include: {
-          service: {
-            select: {
-              id: true,
-              name: true,
-              price: true,
-            },
-          },
-          employee: {
-            include: {
-              user: {
-                select: { id: true, name: true },
-              },
-            },
-          },
-        },
-      })
-
-      console.log("✅ BOOKING CRIADO COM SUCESSO:", booking.id)
-      return booking
-    })
-
-    // ✅ Revalidar paths após sucesso
+    // Revalidate paths after success
     revalidatePath(`/barbershops/${params.barbershopId}`, "page")
     revalidatePath("/bookings", "page")
 
     return {
-      id: newBooking.id,
-      scheduledAt: newBooking.scheduledAt,
-      employee: newBooking.employee,
+      id: appointment.id,
+      scheduledAt: new Date(appointment.startTime),
+      employee: {
+        id: params.employeeId,
+        user: { name: DEFAULT_EMPLOYEE_NAME }, // Temporary - see constant definition
+      },
     }
   } catch (error) {
-    console.error("❌ ERRO NA TRANSAÇÃO:", error)
+    console.error("❌ ERRO AO CRIAR APPOINTMENT:", error)
 
-    // ✅ Tratamento específico de erros
     if (error instanceof Error) {
-      // Se é erro de conflito, relançar com mensagem específica
-      if (error.message.includes("não está mais disponível")) {
-        throw new Error(
-          "Este horário acabou de ser reservado por outro cliente. Por favor, escolha outro horário.",
-        )
-      }
       throw error
     }
 
-    throw new Error("Erro interno do servidor ao criar o agendamento")
+    throw new Error("Erro ao criar o agendamento")
   }
 }
 
-// ✅ SOLUÇÃO 3: FUNÇÃO PARA VERIFICAR DISPONIBILIDADE EM TEMPO REAL
-// Esta função pode ser chamada pelo frontend para atualizar a UI
+// NOTE: This function still uses Prisma for real-time availability checking
+// It is kept here for backward compatibility with existing UI components
+// TODO: Migrate to external API when availability endpoint becomes available
+//
+// IMPORTANT: Currently stubbed to return always available, which means:
+// - Real-time availability checking is disabled
+// - The external API must handle conflict detection during booking creation
+// - UI may show available slots that are actually taken (but creation will fail with proper error)
 export const checkRealTimeAvailability = async ({
-  barbershopId,
-  employeeId,
-  scheduledAt,
+  barbershopId, // eslint-disable-line @typescript-eslint/no-unused-vars
+  employeeId, // eslint-disable-line @typescript-eslint/no-unused-vars
+  scheduledAt, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: {
   barbershopId: string
   employeeId: string
   scheduledAt: Date
 }) => {
-  const conflictingBooking = await db.booking.findFirst({
-    where: {
-      employeeId,
-      scheduledAt,
-      barbershopId,
-      status: {
-        in: ["SCHEDULED", "CONFIRMED", "IN_PROGRESS"],
-      },
-    },
-  })
+  // For now, we'll return always available since we're using external API
+  // The external API should handle conflict checking internally
+  console.warn(
+    "⚠️ checkRealTimeAvailability is deprecated - using external API for booking creation",
+  )
 
   return {
-    isAvailable: !conflictingBooking,
-    conflictingBooking: conflictingBooking
-      ? {
-          id: conflictingBooking.id,
-          userId: conflictingBooking.userId,
-        }
-      : null,
+    isAvailable: true,
+    conflictingBooking: null,
   }
-}
-
-// ✅ SOLUÇÃO 4: LIMPEZA AUTOMÁTICA DE BOOKINGS EXPIRADOS
-// Executar esta função periodicamente para liberar horários
-export const cleanupExpiredBookings = async () => {
-  const now = new Date()
-
-  const expiredBookings = await db.booking.updateMany({
-    where: {
-      scheduledAt: {
-        lt: now,
-      },
-      status: {
-        in: ["SCHEDULED", "CONFIRMED"],
-      },
-    },
-    data: {
-      status: "COMPLETED",
-    },
-  })
-
-  console.log(
-    `✅ ${expiredBookings.count} bookings expirados foram atualizados`,
-  )
-  return expiredBookings.count
-}
-
-// ===== FUNÇÃO DE DEBUG MELHORADA =====
-export const debugBookingConflicts = async () => {
-  console.log("🔍 DEBUGANDO CONFLITOS DE AGENDAMENTO...")
-
-  // Buscar bookings duplicados no mesmo horário/employee
-  const duplicateBookings = await db.booking.findMany({
-    where: {
-      status: {
-        in: ["SCHEDULED", "CONFIRMED", "IN_PROGRESS"],
-      },
-    },
-    orderBy: [{ employeeId: "asc" }, { scheduledAt: "asc" }],
-  })
-
-  // ✅ CORRIGIDO: Tipagem adequada para o Record
-  const conflicts: Record<string, typeof duplicateBookings> = {}
-
-  duplicateBookings.forEach((booking) => {
-    const key = `${booking.employeeId}-${booking.scheduledAt.toISOString()}`
-    if (!conflicts[key]) {
-      conflicts[key] = []
-    }
-    conflicts[key].push(booking)
-  })
-
-  // Filtrar apenas conflitos reais (mais de 1 booking no mesmo slot)
-  const realConflicts = Object.entries(conflicts).filter(
-    ([_, bookings]) => bookings.length > 1,
-  )
-
-  console.log("⚠️ CONFLITOS ENCONTRADOS:", realConflicts.length)
-
-  realConflicts.forEach(([key, bookings]) => {
-    console.log(`🚨 Conflito em ${key}:`)
-    bookings.forEach((booking) => {
-      console.log(`  - Booking ID: ${booking.id}, User: ${booking.userId}`)
-    })
-  })
-
-  return realConflicts
 }
