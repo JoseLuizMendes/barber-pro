@@ -5,6 +5,10 @@ import { revalidatePath } from "next/cache"
 import { authOptions } from "../_lib/auth"
 import { createAppointment } from "../_services/api"
 
+// Temporary constants - TODO: Replace with proper implementations
+const TEMP_CUSTOMER_PHONE = "+5500000000000" // TODO: Add phone field to User model
+const DEFAULT_EMPLOYEE_NAME = "Barbeiro" // TODO: Get from API response when available
+
 interface CreateBookingParams {
   serviceId: string
   barbershopId: string
@@ -28,7 +32,7 @@ export const createBooking = async (params: CreateBookingParams) => {
     // Map frontend data to backend API format
     const appointmentData = {
       customerName: user.name || "Cliente", // Map User.name to customerName
-      customerPhone: "+5500000000000", // Hardcoded for now (as per requirements)
+      customerPhone: TEMP_CUSTOMER_PHONE, // Temporary - see constant definition
       serviceId: params.serviceId, // Map Service.id to serviceId
       startTime: params.date.toISOString(), // Map Date to ISO string
     }
@@ -49,7 +53,7 @@ export const createBooking = async (params: CreateBookingParams) => {
       scheduledAt: new Date(appointment.startTime),
       employee: {
         id: params.employeeId,
-        user: { name: "Barbeiro" }, // Simplified since API doesn't return employee info
+        user: { name: DEFAULT_EMPLOYEE_NAME }, // Temporary - see constant definition
       },
     }
   } catch (error) {

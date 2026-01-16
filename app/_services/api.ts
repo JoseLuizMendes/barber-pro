@@ -6,8 +6,21 @@ import {
 
 /**
  * Base URL for the external API
+ * In production, NEXT_PUBLIC_API_URL must be set
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+const API_BASE_URL = (() => {
+  const url = process.env.NEXT_PUBLIC_API_URL
+
+  // In production, require explicit API URL configuration
+  if (process.env.NODE_ENV === "production" && !url) {
+    throw new Error(
+      "NEXT_PUBLIC_API_URL environment variable is required in production",
+    )
+  }
+
+  // Default to localhost in development
+  return url || "http://localhost:3001"
+})()
 
 /**
  * Generic API error class
