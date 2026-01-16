@@ -65,11 +65,23 @@ async function apiFetch<T>(
 
     // Handle non-OK responses
     if (!response.ok) {
-      const errorResponse = data as ApiErrorResponse
+      let errorMessage = "API request failed"
+
+      // Try to extract error message from response
+      if (typeof data === "object" && data !== null) {
+        const errorData = data as Record<string, unknown>
+        errorMessage =
+          (errorData.message as string) ||
+          (errorData.error as string) ||
+          errorMessage
+      } else if (typeof data === "string") {
+        errorMessage = data
+      }
+
       throw new ApiError(
-        errorResponse.message || errorResponse.error || "API request failed",
+        errorMessage,
         response.status,
-        errorResponse,
+        typeof data === "object" ? (data as ApiErrorResponse) : undefined,
       )
     }
 

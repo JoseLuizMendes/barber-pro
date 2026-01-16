@@ -70,6 +70,11 @@ export const createBooking = async (params: CreateBookingParams) => {
 // NOTE: This function still uses Prisma for real-time availability checking
 // It is kept here for backward compatibility with existing UI components
 // TODO: Migrate to external API when availability endpoint becomes available
+//
+// IMPORTANT: Currently stubbed to return always available, which means:
+// - Real-time availability checking is disabled
+// - The external API must handle conflict detection during booking creation
+// - UI may show available slots that are actually taken (but creation will fail with proper error)
 export const checkRealTimeAvailability = async ({
   barbershopId, // eslint-disable-line @typescript-eslint/no-unused-vars
   employeeId, // eslint-disable-line @typescript-eslint/no-unused-vars
