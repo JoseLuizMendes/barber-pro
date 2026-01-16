@@ -9,10 +9,40 @@ Sistema profissional para gerenciamento de barbearias, incluindo agendamentos, c
 - **Runtime:** JavaScript (0.2%)
 
 #### ✨ Características
-- Sistema de agendamento
+- Sistema de agendamento via API externa
 - Gerenciamento de clientes
 - Controle de serviços
 - Interface moderna e responsiva
+
+#### 🔧 Configuração
+
+##### Variáveis de Ambiente
+Copie o arquivo `.env.example` para `.env.local` e configure as variáveis:
+
+```bash
+cp .env.example .env.local
+```
+
+**Variáveis Obrigatórias:**
+- `DATABASE_URL`: URL do banco de dados PostgreSQL
+- `NEXT_PUBLIC_API_URL`: URL da API externa AgendamentoAPI (padrão: http://localhost:3001)
+- `NEXTAUTH_URL`: URL da aplicação Next.js
+- `NEXTAUTH_SECRET`: Chave secreta para NextAuth
+
+##### Instalação
+```bash
+npm install
+```
+
+##### Desenvolvimento
+```bash
+npm run dev
+```
+
+##### Build
+```bash
+npm run build
+```
 
 ---
 
